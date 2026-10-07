@@ -408,8 +408,14 @@ textarea {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  padding-top: 120px;
+  padding-bottom: 40px;
+}
+.hero-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  padding-top: 80px;
 }
 .hero-title {
   font-size: clamp(52px, 9vw, 148px);
@@ -431,15 +437,12 @@ textarea {
   gap: 14px;
 }
 .hero-meta {
-  position: absolute;
-  left: var(--pad);
-  right: var(--pad);
-  bottom: 36px;
+  position: relative;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  max-width: calc(var(--container) - var(--pad) * 2);
-  margin: 0 auto;
+  margin-top: 40px;
 }
 .hero-badges {
   display: flex;
