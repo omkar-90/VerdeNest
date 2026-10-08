@@ -60,10 +60,12 @@ export const ADDONS = [
   { key: 'iot', label: 'IoT automation', fixed: 150000 },
 ]
 
+const base = import.meta.env.BASE_URL;
+
 export const PROJECTS = [
-  { img: '/images/polyhouse.png', title: 'Sahyadri Capsicum Farm', meta: 'Nashik · 2 acres · Polyhouse', chips: ['Polyhouse', '2024'] },
-  { img: '/images/glasshouse.png', title: 'LeafCo Hydro Hub', meta: 'Pune · 6,000 m² · Hydroponic', chips: ['Hydroponic', '2025'] },
-  { img: '/images/nethouse.png', title: 'Green Valley Cluster', meta: 'Satara · 12 units · Net houses', chips: ['Net house', '2025'] },
+  { img: `${base}images/polyhouse.png`, title: 'Sahyadri Capsicum Farm', meta: 'Nashik · 2 acres · Polyhouse', chips: ['Polyhouse', '2024'] },
+  { img: `${base}images/glasshouse.png`, title: 'LeafCo Hydro Hub', meta: 'Pune · 6,000 m² · Hydroponic', chips: ['Hydroponic', '2025'] },
+  { img: `${base}images/nethouse.png`, title: 'Green Valley Cluster', meta: 'Satara · 12 units · Net houses', chips: ['Net house', '2025'] },
 ]
 
 export const PROCESS = [
