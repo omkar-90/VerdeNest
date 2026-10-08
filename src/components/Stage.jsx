@@ -24,6 +24,7 @@ export default function Stage({ ready }) {
         scrollTrigger: {
           trigger: wrap.current,
           start: 'top top',
+          // Phase 7: scrub: 1.5 gives the camera a weighted, momentum-glide feel
           end: () => `+=${window.innerHeight * 4}`,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -34,13 +35,22 @@ export default function Stage({ ready }) {
         },
       })
 
+      // Phase 8: Chapter cards — cinematic scale + blur reveal
       gsap.utils.toArray('.chapter').forEach((ch) => {
         const card = ch.querySelector('.chapter-card')
-        gsap
-          .timeline({ scrollTrigger: { trigger: ch, start: 'top bottom', end: 'bottom top', scrub: true } })
-          .fromTo(card, { autoAlpha: 0, y: 120 }, { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.38 })
-          .to(card, { autoAlpha: 1, duration: 0.24 })
-          .to(card, { autoAlpha: 0, y: -120, ease: 'power2.in', duration: 0.38 })
+        const h2 = card.querySelector('h2')
+        const p  = card.querySelector('p')
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: ch, start: 'top bottom', end: 'bottom top', scrub: true },
+        })
+        tl.fromTo(card,
+          { autoAlpha: 0, y: 100, scale: 0.94, filter: 'blur(8px)' },
+          { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', ease: 'power2.out', duration: 0.36 }
+        )
+        if (h2) tl.fromTo(h2, { y: 22, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.18 }, '<0.1')
+        if (p)  tl.fromTo(p,  { y: 14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.18 }, '<0.08')
+        tl.to(card, { autoAlpha: 1, duration: 0.26 })
+        tl.to(card, { autoAlpha: 0, y: -100, scale: 0.94, filter: 'blur(8px)', ease: 'power2.in', duration: 0.36 })
       })
 
       gsap.to('.hero-content, .hero-meta', {
@@ -53,13 +63,31 @@ export default function Stage({ ready }) {
     { scope: wrap }
   )
 
+  // Phase 8: Hero text — split reveal with stagger + blur-clear on subtitle
   useGSAP(
     () => {
       if (!ready) return
       gsap
         .timeline()
-        .from('.hero-title .line > span', { yPercent: 115, duration: 1.4, ease: 'expo.out', stagger: 0.12 })
-        .from('.hero-fade', { autoAlpha: 0, y: 26, duration: 1.1, stagger: 0.08, ease: 'power3.out' }, '-=1')
+        .from('.hero-title .line > span', {
+          yPercent: 115,
+          duration: 1.5,
+          ease: 'expo.out',
+          stagger: 0.14,
+        })
+        .from(
+          '.hero-fade',
+          {
+            autoAlpha: 0,
+            y: 24,
+            filter: 'blur(6px)',
+            duration: 1.1,
+            stagger: 0.09,
+            ease: 'power3.out',
+            clearProps: 'filter',
+          },
+          '-=1.1'
+        )
     },
     { dependencies: [ready], scope: wrap }
   )

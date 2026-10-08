@@ -96,14 +96,19 @@ export default function Greenhouse({ type = 'poly', length = 24, width = 10, fx 
   const mats = useMemo(
     () => ({
       frame: new THREE.MeshStandardMaterial({ color: cfg.frame, metalness: 0.85, roughness: 0.3, emissive: new THREE.Color('#b6f09c'), emissiveIntensity: 0 }),
+      // Phase 1: Physical glass — real IOR + transmission instead of fake opacity
       cover: new THREE.MeshPhysicalMaterial({
         color: cfg.cover,
+        transmission: cfg.roughness < 0.2 ? 0.92 : 0,   // glass/poly: physical; net: opaque
         transparent: true,
-        opacity: cfg.opacity,
+        opacity: cfg.roughness < 0.2 ? 1 : cfg.opacity,
+        ior: 1.45,
+        thickness: 0.35,
         roughness: cfg.roughness,
         metalness: 0,
-        clearcoat: 1,
-        clearcoatRoughness: 0.15,
+        clearcoat: cfg.roughness < 0.5 ? 1 : 0,
+        clearcoatRoughness: 0.1,
+        envMapIntensity: 1.2,
         side: THREE.DoubleSide,
         depthWrite: false,
       }),
@@ -262,10 +267,18 @@ export default function Greenhouse({ type = 'poly', length = 24, width = 10, fx 
   const fanRefs = useRef([])
 
   /* ---------- Per-frame fx ---------- */
-  useFrame((_, dt) => {
+  useFrame(({ clock }, dt) => {
     const d = Math.min(dt, 0.05)
-    mats.cover.opacity = cfg.opacity * fx.cover
-    mats.cover.visible = fx.cover > 0.01
+    const t = clock.elapsedTime
+
+    // Cover visibility (physical glass: control via cover prop not opacity)
+    if (mats.cover.transmission > 0) {
+      mats.cover.visible = fx.cover > 0.01
+    } else {
+      mats.cover.opacity = cfg.opacity * fx.cover
+      mats.cover.visible = fx.cover > 0.01
+    }
+
     mats.frame.emissiveIntensity = fx.glow * 1.8
     mats.shade.opacity = 0.65 * fx.shade
     mats.shade.visible = fx.shade > 0.01
@@ -285,7 +298,23 @@ export default function Greenhouse({ type = 'poly', length = 24, width = 10, fx 
       pos.needsUpdate = true
     }
 
-    if (Math.abs(fx.plants - lastGrow.current) > 0.002) {
+    // Phase 5: Wind sway — each plant sways on a unique phase based on position
+    const pm = plantRef.current
+    if (pm && fx.plants > 0.05) {
+      const windAmp = 0.032 + fx.climate * 0.045
+      const windFreq = 1.1 + fx.climate * 0.8
+      plantData.plants.forEach((p, i) => {
+        const phase = p.x * 3.7 + p.z * 2.1
+        const sway = Math.sin(t * windFreq + phase) * windAmp
+        const s = p.s * Math.max(0.001, fx.plants)
+        dummy.position.set(p.x, p.y, p.z)
+        dummy.rotation.set(sway, p.rot, sway * 0.4)
+        dummy.scale.set(s, s, s)
+        dummy.updateMatrix()
+        pm.setMatrixAt(i, dummy.matrix)
+      })
+      pm.instanceMatrix.needsUpdate = true
+    } else if (Math.abs(fx.plants - lastGrow.current) > 0.002) {
       applyGrowth(fx.plants)
       lastGrow.current = fx.plants
     }
