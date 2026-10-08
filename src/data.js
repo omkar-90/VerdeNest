@@ -1,8 +1,8 @@
 // Dummy business content — replace with real data later.
 export const BRAND = {
   name: 'VerdeNest',
-  phone: '+91 98765 43210',
-  whatsapp: '919876543210',
+  phone: '+91 98765 4003210',
+  whatsapp: '91987654003210',
   email: 'hello@verdenest.in',
   city: 'Nashik, Maharashtra',
 }
